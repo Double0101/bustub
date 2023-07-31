@@ -66,17 +66,26 @@ auto ExtendibleHashTable<K, V>::GetNumBucketsInternal() const -> int {
 
 template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::Find(const K &key, V &value) -> bool {
-  UNREACHABLE("not implemented");
+  // TODO: concurrency
+  size_t dir_idx = IndexOf(key);
+  Bucket *bucket = dir_[dir_idx];
+  return bucket->Find(key, value);
 }
 
 template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::Remove(const K &key) -> bool {
-  UNREACHABLE("not implemented");
+  // TODO: concurrency
+  size_t dir_idx = IndexOf(key);
+  Bucket *bucket = dir_[dir_idx];
+  return bucket->Remove(key);
 }
 
 template <typename K, typename V>
 void ExtendibleHashTable<K, V>::Insert(const K &key, const V &value) {
-  UNREACHABLE("not implemented");
+  // TODO: concurrency
+  size_t dir_idx = IndexOf(key);
+  Bucket *bucket = dir_[dir_idx];
+  bucket->Insert(key, value);
 }
 
 //===--------------------------------------------------------------------===//
