@@ -101,7 +101,7 @@ void ExtendibleHashTable<K, V>::Insert(const K &key, const V &value) {
 
 template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::RedistributeBucket(size_t idx, std::shared_ptr<Bucket> bucket) -> void {
-  size_t n_idx = idx & (1 << bucket->GetDepth());
+  size_t n_idx = idx | (1 << bucket->GetDepth());
   bucket->IncrementDepth();
 
   // resize dir_
@@ -119,13 +119,13 @@ auto ExtendibleHashTable<K, V>::RedistributeBucket(size_t idx, std::shared_ptr<B
   // put some elements into new bucket
   int new_mask = (1 << bucket->GetDepth()) - 1;
   std::shared_ptr<Bucket> nb = dir_[n_idx];
-  std::list<std::pair<K, V>> blst = bucket->GetItems();
+  std::list<std::pair<K, V>> &blst = bucket->GetItems();
   auto it = blst.begin();
   while (it != blst.end()) {
     K key = it->first;
     if ((std::hash<K>()(key) & new_mask) == n_idx) {
       nb->Insert(key, it->second);
-      blst.erase(it);
+      it = blst.erase(it);
     } else {
       ++it;
     }
