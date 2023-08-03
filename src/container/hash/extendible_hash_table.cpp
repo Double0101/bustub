@@ -24,7 +24,7 @@ namespace bustub {
 template <typename K, typename V>
 ExtendibleHashTable<K, V>::ExtendibleHashTable(size_t bucket_size)
     : global_depth_(0), bucket_size_(bucket_size), num_buckets_(1) {
-  dir_.push_back(std::shared_ptr<Bucket>(new Bucket(bucket_size, 0)));
+  dir_.push_back(std::make_shared<Bucket>(bucket_size, 0));
 }
 
 template <typename K, typename V>
@@ -68,27 +68,23 @@ auto ExtendibleHashTable<K, V>::GetNumBucketsInternal() const -> int {
 
 template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::Find(const K &key, V &value) -> bool {
-  latch_.lock();
+  std::scoped_lock<std::mutex> lock(latch_);
   size_t dir_idx = IndexOf(key);
   std::shared_ptr<Bucket> bucket = dir_[dir_idx];
-  bool res = bucket->Find(key, value);
-  latch_.unlock();
-  return res;
+  return bucket->Find(key, value);
 }
 
 template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::Remove(const K &key) -> bool {
-  latch_.lock();
+  std::scoped_lock<std::mutex> lock(latch_);
   size_t dir_idx = IndexOf(key);
   std::shared_ptr<Bucket> bucket = dir_[dir_idx];
-  bool res = bucket->Remove(key);
-  latch_.unlock();
-  return res;
+  return bucket->Remove(key);
 }
 
 template <typename K, typename V>
 void ExtendibleHashTable<K, V>::Insert(const K &key, const V &value) {
-  latch_.lock();
+  std::scoped_lock<std::mutex> lock(latch_);
   size_t dir_idx = IndexOf(key);
   std::shared_ptr<Bucket> bucket = dir_[dir_idx];
   while (!bucket->Insert(key, value)) {
@@ -96,7 +92,6 @@ void ExtendibleHashTable<K, V>::Insert(const K &key, const V &value) {
     dir_idx = IndexOf(key);
     bucket = dir_[dir_idx];
   }
-  latch_.unlock();
 }
 
 template <typename K, typename V>
@@ -115,7 +110,7 @@ auto ExtendibleHashTable<K, V>::RedistributeBucket(size_t idx, std::shared_ptr<B
     }
   }
   // add new Bucket
-  dir_[n_idx].reset(new Bucket(bucket_size_, bucket->GetDepth()));
+  dir_[n_idx]= std::make_shared<Bucket>(bucket_size_, bucket->GetDepth());
   // put some elements into new bucket
   int new_mask = (1 << bucket->GetDepth()) - 1;
   std::shared_ptr<Bucket> nb = dir_[n_idx];
