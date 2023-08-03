@@ -133,32 +133,16 @@ class LRUKReplacer {
    */
   auto Size() -> size_t;
 
-  class Timer {
-   private:
-    size_t k_;
-    size_t no_replacer_;
-    size_t current_timestamp_{0};
-    std::vector<std::shared_ptr<std::list<size_t>>> last_k_time_;
-   public:
-    explicit Timer(size_t k, size_t no_replace);
-    void FrameAccess(frame_id_t frame_id);
-    /*
-     * return true when frame has accessed into buffer more than k_ times
-     *    and *tm is the earliest time in these k_ access
-     * return false when frame asscessed less than k_ times
-     *    and *tm is the earliest time
-     */
-    auto BackwardK(frame_id_t frame_id, size_t *tm) -> bool;
-    auto Remove(frame_id_t frame_id) -> void;
-  };
  private:
   // TODO(student): implement me! You can replace these member variables as you like.
   // Remove maybe_unused if you start using them.
+  size_t k_;
   size_t curr_size_{0};
   size_t replacer_size_;
   std::mutex latch_;
   std::vector<bool> evictable_;
-  Timer timer_;
+  std::list<frame_id_t> history_queue_;
+  std::list<frame_id_t> cache_queue_;
 };
 
 }  // namespace bustub
