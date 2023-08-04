@@ -136,13 +136,25 @@ class LRUKReplacer {
  private:
   // TODO(student): implement me! You can replace these member variables as you like.
   // Remove maybe_unused if you start using them.
+  struct Query {
+    frame_id_t frame_id_;
+    size_t query_time_;
+    Query(frame_id_t frameId, size_t t) : frame_id_(frameId), query_time_(t) {}
+    bool operator<(const Query &q) {
+      return query_time_ < q.query_time_;
+    }
+  };
   size_t k_;
+  size_t curr_time_{0};
   size_t curr_size_{0};
   size_t replacer_size_;
+//  size_t filled_size_{0};
   std::mutex latch_;
   std::vector<bool> evictable_;
-  std::list<frame_id_t> history_queue_;
-  std::list<frame_id_t> cache_queue_;
+//  std::vector<bool> filled_;
+  std::vector<size_t> counter_;
+  std::shared_ptr<std::list<Query>> cache_queue_[2];
+  auto CacheUpgrade(frame_id_t frame_id) -> void;
 };
 
 }  // namespace bustub
