@@ -172,10 +172,11 @@ class BufferPoolManagerInstance : public BufferPoolManager {
    * @brief Deallocate a page on disk. Caller should acquire the latch before calling this function.
    * @param page_id id of the page to deallocate
    */
-  void DeallocatePage(__attribute__((unused)) page_id_t page_id) {
-    // This is a no-nop right now without a more complex data structure to track deallocated pages
-  }
+  auto DeallocatePage(__attribute__((unused)) page_id_t page_id) -> void;
 
   // TODO(student): You may add additional private members and helper functions
+ private:
+  auto GetEmptyPage(frame_id_t *frame_id) -> bool;
+  auto ResetPage(Page *page) -> void;
 };
 }  // namespace bustub
